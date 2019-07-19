@@ -57,15 +57,14 @@ export default {
             this.$refs.form.validate(async (flag)=> {
                 // console.log(flag);
                 if(!flag) return;
-                var {data:res} = await this.axios.put('login',this.loginForm)
+                var res = await this.axios.put('login',this.loginForm)
                 console.log(res);
                 if(res.meta.status == 200) {
                    this.$message.success('登录成功')
                    sessionStorage.setItem('token',res.data.token)
                     this.$router.push('/home')              
                 } else {
-                    this.$message.error(res.meta.msg)
-                    
+                    this.$message.error(res.meta.msg)                   
                 }
                 
                 
