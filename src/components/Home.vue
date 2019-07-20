@@ -79,7 +79,7 @@ export default {
       var res = await this.axios.get('menus')
       // console.log(res);
       this.menuList = res.data
-      console.log(this.menuList); 
+      // console.log(this.menuList); 
     },
     toggleLIst() {
       this.isCollapse = !this.isCollapse

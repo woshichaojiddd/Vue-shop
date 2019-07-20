@@ -21,10 +21,16 @@ import {
     TableColumn,
     Switch,
     Pagination,
-    Tooltip
+    Tooltip,
+    Dialog,
+    MessageBox,
+    Select,
+    Option,
+    Tag
 } from 'element-ui'
 
 Vue.prototype.$message = Message
+Vue.prototype.$confirm = MessageBox.confirm
 
 // 组件标签要让全局使用 直接用Vue.use()
 // js方法要让全局使用 必须关在到Vue.prototype上
@@ -49,3 +55,7 @@ Vue.use(TableColumn)
 Vue.use(Switch)
 Vue.use(Pagination)
 Vue.use(Tooltip)
+Vue.use(Dialog)
+Vue.use(Select)
+Vue.use(Option)
+Vue.use(Tag)
