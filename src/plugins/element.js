@@ -26,7 +26,9 @@ import {
     MessageBox,
     Select,
     Option,
-    Tag
+    Tag,
+    Tree,
+    Cascader
 } from 'element-ui'
 
 Vue.prototype.$message = Message
@@ -59,3 +61,5 @@ Vue.use(Dialog)
 Vue.use(Select)
 Vue.use(Option)
 Vue.use(Tag)
+Vue.use(Tree)
+Vue.use(Cascader)

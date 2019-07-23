@@ -7,6 +7,12 @@ import './assets/css/global.css'
 // 导入阿里图标
 import './assets/fonts/iconfont.css'
 
+// 导入树状表格组件件
+import treeTable from 'vue-table-with-tree-grid'
+
+// 设置树状结构组件
+Vue.component("tree-table", treeTable)
+
 // 导入axios
 import axios from 'axios'
 

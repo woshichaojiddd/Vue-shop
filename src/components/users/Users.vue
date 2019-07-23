@@ -40,7 +40,7 @@
             <el-button type="danger" icon="el-icon-delete" size="mini" @click="open(item.row.id)"></el-button>
             <!-- 分配用户角色 -->
             <el-tooltip class="item" effect="dark" content="分配角色" placement="top" :enterable="false">
-              <el-button type="warning" icon="el-icon-setting" size="mini" @click="showDistriDiolg(item.row)"></el-button>
+              <el-button type="warning" icon="el-icon-setting" size="mini" @click="setRolesDiolg(item.row)"></el-button>
             </el-tooltip>
           </template>
         </el-table-column>
@@ -95,19 +95,19 @@
       </span>
     </el-dialog>
     <!-- 分配用户角色对话框 -->
-    <el-dialog title="分配用户角色" :visible.sync="distriDialogVisible" width="50%">
-      <p>当前的用户: {{distriData.username}}</p>
-      <p>当前的角色: {{distriData.role_name}}</p>
+    <el-dialog title="分配用户角色" :visible.sync="setRolesiDialogVisible" width="50%" @close='resetValue'>
+      <p>当前的用户: {{rolesData.username}}</p>
+      <p>当前的角色: {{rolesData.role_name}}</p>
       <p>分配新角色: 
-        <el-select v-model="distriData.rid" slot="prepend" placeholder="请选择">
-          <el-option label="餐厅名" value="1"></el-option>
-          <el-option label="订单号" value="2"></el-option>
-          <el-option label="用户电话" value="3"></el-option>
+        <!-- 角色下拉框 -->
+        <el-select v-model="value" placeholder="请选择">
+          <el-option v-for="item in rolesData.roleList" :key="item.id" :label="item.roleName" :value="item.id">
+          </el-option>
         </el-select>
       </p>
       <span slot="footer" class="dialog-footer">
-        <el-button @click="distriDialogVisible = false">取 消</el-button>
-        <el-button type="primary" @click="editBtn">确 定</el-button>
+        <el-button @click="setRolesiDialogVisible = false">取 消</el-button>
+        <el-button type="primary" @click="setRoles">确 定</el-button>
       </span>
     </el-dialog>
     
@@ -147,7 +147,7 @@ export default {
       // 控制添加用户对话框的显示与隐藏
       addDialogVisible: false,
       editDialogVisible: false,
-      distriDialogVisible: false,
+      setRolesiDialogVisible: false,
       // 添加用户数据
       addForm: {
         username: '',
@@ -180,11 +180,15 @@ export default {
         email: ''
       },
       // 分配用户角色的数据
-      distriData: {
+      rolesData: {
         username: '',
         role_name: '',
-        rid: ''
-      }
+        roleList: []
+      },
+      // 分配用户对话框下拉框选择的角色id
+      value: '',
+      // 用户id
+      userId: 0
     };
   },
 
@@ -197,7 +201,7 @@ export default {
       if (res.meta.status !== 200)
         return this.$message.error("获取数据失败,请检查代码");
       this.userList = res.data.users;
-        console.log(this.userList);
+        // console.log(this.userList);
       this.totalPage = res.data.total;
     },
     // switch修改状态
@@ -290,15 +294,42 @@ export default {
       });
     },
     // 分配用户角色
-    showDistriDiolg(data) {
-      this.distriDialogVisible = true
-      console.log(data);
-      this.distriData.username = data.username
-      this.distriData.role_name = data.role_name
+    async setRolesDiolg(data) {
+      this.setRolesiDialogVisible = true
+      // console.log(data);
+      this.rolesData.username = data.username
+      this.rolesData.role_name = data.role_name
+      // 获取用户id
+      this.userId = data.id
       // 请求下拉框角色信息
-
-      
+      const res = await this.axios.get('roles')
+      // console.log(res);
+      // 获取用户角色列表
+      this.rolesData.roleList = res.data
+      // console.log(this.rolesData.roleList);
     },
+    // 取消重置下拉框功能
+    resetValue() {
+      this.value = ''
+    },
+    // 提交新的角色
+    async setRoles() {
+      // 获取角色id
+      // console.log(this.value);
+      // 获取用户id
+      // console.log(this.userId);
+      // 若选择了发送请求
+      if(!this.value) return this.$message.error('请选择新角色')
+      const res = await this.axios.put(`users/${this.userId}/role`,{rid: this.value})
+      // console.log(res);
+      if(res.meta.status == 200) {
+        this.$message.success('设置新角色成功')
+        this.setRolesiDialogVisible = false
+        this.getUsers()
+      } else {
+        this.$message.error(res.meta.msg)
+      }
+    }
   },
 
   created() {
