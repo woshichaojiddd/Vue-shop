@@ -38,22 +38,22 @@
     </el-pagination>
     </el-card>
     <!-- 添加分类对话框 -->
-    <el-dialog title="添加分类" :visible.sync="addCateDialogVisible" width="50%">
+    <el-dialog title="添加分类" :visible.sync="addCateDialogVisible" width="50%" @close="addCateDialogClose">
         <!-- 添加分类表单 -->
-        <el-form :model="addCateData" :rules="rules" ref="ruleForm" label-width="100px">
+        <el-form :model="addCateData" :rules="rules" ref="addCateRef" label-width="100px">
             <el-form-item label="分类名称" prop="cat_name">
                 <el-input v-model="addCateData.cat_name"></el-input>
             </el-form-item>
-            <el-cascader
-            v-model="cateList"
-            :options="options"
-            :props="{ expandTrigger: 'hover' }"
-            @change="handleChange">
-            </el-cascader>
+                <el-form-item label="父级分类">
+                    <!-- options用来指定数据源  props用来指定配置对象 -->
+                    <!-- v-model选中之后对应每一项的绑定值 是个数组-->
+                <el-cascader v-model="selectOptionArr" :options="parentCate" :props="cascaderProps" @change="handleChange" clearable>
+                </el-cascader>
+            </el-form-item>
         </el-form>
         <span slot="footer" class="dialog-footer">
             <el-button @click="addCateDialogVisible = false">取 消</el-button>
-            <el-button type="primary" @click="addCateDialogVisible = false">确 定</el-button>
+            <el-button type="primary" @click="addCate">确 定</el-button>
         </span>
     </el-dialog>
   </div>
@@ -96,20 +96,26 @@ export default {
         addCateDialogVisible: false,
         // 添加分类数据参数
         addCateData: {
-            cat_pid: '',
+            cat_pid: 0,
             cat_name: '',
-            cat_level: ''
+            cat_level: 0
         },
-        rules: '',
+        // 添加分类表单验证
+        rules: {
+            cat_name: [
+            { required: true, message: '请输入分类名称', trigger: 'blur' },
+          ]},
         // 添加分类选择框数据
-        options:[{
-            value:'cat_id',
-            label:'cat_name',
-            children:[{
-                value:'cat_id',
-                label:'cat_name',
-            }]
-        }]
+        parentCate:[],
+        // 添加分类选择框配置对象
+        cascaderProps:{
+            expandTrigger: 'hover',
+            label: 'cat_name',
+            value: 'cat_id',
+            checkStrictly: true
+        },
+        // 添加分类选择框选中的数据对应value值
+        selectOptionArr: []
     }
   },
 
@@ -121,7 +127,7 @@ export default {
         //   console.log(res);
           if(res.meta.status == 200) {
             this.cateList = res.data.result
-            console.log(this.cateList); 
+            // console.log(this.cateList); 
             this.total = res.data.total
           }
       },
@@ -136,12 +142,47 @@ export default {
       // 显示添加分类对话框
       async showAddCateDialog() {
           this.addCateDialogVisible = true
-          // 获取渲染数据 根据id查询分类
-          
+          // 获取渲染数据 只需获取到二级 
+          const res = await this.axios.get('categories',{params:{type:2}})
+          this.parentCate = res.data
+        //   console.log(this.parentCate);          
       },
+      // 添加分类选择框数据发生变化
       handleChange() {
-
-      }
+        //   console.log(this.selectOptionArr);
+          if(this.selectOptionArr.length > 0) {
+          // 获得新增分类父id  为this.selectOptionArr的最后一项
+          this.addCateData.cat_pid = this.selectOptionArr[this.selectOptionArr.length - 1]
+          // 获取新增分类等级
+          this.addCateData.cat_level = this.selectOptionArr.length
+          } else {
+              this.addCateData.cat_pid = 0
+              this.addCateData.cat_level = 0
+          }         
+      },
+      // 监听表单关闭事件
+      addCateDialogClose() {
+          this.$refs.addCateRef.resetFields()
+          this.selectOptionArr = []
+          this.addCateData.cat_pid = 0
+          this.addCateData.cat_level = 0
+      },
+      // 提交添加的分类数据 重置表单数据
+      addCate() {
+        //   console.log(this.addCateData)
+          this.$refs.addCateRef.validate(async (flag) => {
+          if (!flag) return 
+          const res = await this.axios.post('categories',this.addCateData)
+        //   console.log(res);
+          if(res.meta.status == 201) {
+              this.$message.success('添加分类成功!')
+              this.addCateDialogVisible = false
+              this.getgoods()
+          } else {
+             this.$message.error(res.meta.msg) 
+          }        
+      })
+      }         
 
   },
 
@@ -153,6 +194,11 @@ export default {
 
 <style lang='less' scoped>
 .zk-table {
-    margin: 20px 0
+    margin: 20px 0;
 }
+.el-cascader {
+    width: 347px;
+}
+
+
 </style>

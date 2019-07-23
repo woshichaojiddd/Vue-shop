@@ -28,7 +28,10 @@ import {
     Option,
     Tag,
     Tree,
-    Cascader
+    Cascader,
+    Alert,
+    Tabs,
+    TabPane
 } from 'element-ui'
 
 Vue.prototype.$message = Message
@@ -63,3 +66,6 @@ Vue.use(Option)
 Vue.use(Tag)
 Vue.use(Tree)
 Vue.use(Cascader)
+Vue.use(Alert)
+Vue.use(Tabs)
+Vue.use(TabPane)

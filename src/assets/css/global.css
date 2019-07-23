@@ -14,3 +14,7 @@ body,
 .el-card {
     margin: 15px 0;
 }
+
+.el-cascader-panel {
+    height: 200px;
+}
