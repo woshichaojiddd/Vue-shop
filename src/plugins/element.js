@@ -33,7 +33,12 @@ import {
     Tabs,
     TabPane,
     Step,
-    Steps
+    Steps,
+    Checkbox,
+    CheckboxGroup,
+    Upload,
+    Timeline,
+    TimelineItem
 } from 'element-ui'
 
 Vue.prototype.$message = Message
@@ -73,3 +78,8 @@ Vue.use(Tabs)
 Vue.use(TabPane)
 Vue.use(Step)
 Vue.use(Steps)
+Vue.use(Checkbox)
+Vue.use(CheckboxGroup)
+Vue.use(Upload)
+Vue.use(Timeline)
+Vue.use(TimelineItem)

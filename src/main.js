@@ -10,6 +10,16 @@ import './assets/fonts/iconfont.css'
 // 导入树状表格组件件
 import treeTable from 'vue-table-with-tree-grid'
 
+// 导入富文本插件且使用
+import VueQuillEditor from 'vue-quill-editor'
+
+// require styles
+import 'quill/dist/quill.core.css'
+import 'quill/dist/quill.snow.css'
+import 'quill/dist/quill.bubble.css'
+
+Vue.use(VueQuillEditor)
+
 // 设置树状结构组件
 Vue.component("tree-table", treeTable)
 
