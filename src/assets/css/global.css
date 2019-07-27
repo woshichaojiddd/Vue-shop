@@ -18,3 +18,11 @@ body,
 .el-cascader-panel {
     height: 200px;
 }
+
+.cell {
+    font-size: 12px;
+}
+
+.el-step__title {
+    font-size: 13px;
+}

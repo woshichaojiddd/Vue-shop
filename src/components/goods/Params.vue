@@ -24,8 +24,20 @@
                 <el-table :data="manyTableList" border style="width: 100%">
                     <!-- 展开行 -->
                     <el-table-column type="expand">
-                        <template slot-scope="props">
-                            <span>123</span>
+                        <template slot-scope="scope">
+                            <el-tag closable v-for="(item,i) in scope.row.attr_vals" :key='i' @close="handleClose(i,scope.row)">
+                                {{item}}
+                            </el-tag>
+                            <el-input
+                            v-if="scope.row.inputVisible"
+                            v-model="scope.row.inputValue"
+                            ref="saveTagInput"
+                            size="small"
+                            @keyup.enter.native="handleInputConfirm(scope.row)"
+                            @blur="handleInputConfirm(scope.row)"
+                            >
+                            </el-input>
+                            <el-button v-else class="button-new-tag" size="small" @click="showInput(scope.row)">+ New Tag</el-button>
                         </template>
                     </el-table-column>
                     <el-table-column type="index" width="50">
@@ -43,16 +55,27 @@
                     </el-table-column>
                 </el-table>
             </el-tab-pane>
-            <!-- 静态参数 -->
+            <!-- 静态属性 -->
             <el-tab-pane label="静态属性" name="only">
                 <el-button type="primary" size="mini" :disabled="isBtnDisabled" @click='addParams'>添加属性</el-button>
                 <!-- 参数表格 -->
                 <el-table :data="onlyTableList" border style="width: 100%" stripe>
                     <!-- 展开行 -->
                     <el-table-column type="expand">
-                        <template slot-scope="props">
-                            {{prop.row.attr_vals}}
-                            <span>123</span>
+                        <template slot-scope="scope">
+                            <el-tag closable v-for="(item,i) in scope.row.attr_vals" :key='i' @close="handleClose(i,scope.row)">
+                                {{item}}
+                            </el-tag>
+                            <el-input
+                            v-if="scope.row.inputVisible"
+                            v-model="scope.row.inputValue"
+                            ref="saveTagInput"
+                            size="small"
+                            @keyup.enter.native="handleInputConfirm(scope.row)"
+                            @blur="handleInputConfirm(scope.row)"
+                            >
+                            </el-input>
+                            <el-button v-else class="button-new-tag" size="small" @click="showInput(scope.row)">+ New Tag</el-button>
                         </template>
                     </el-table-column>
                     <el-table-column type="index" width="50">
@@ -148,6 +171,7 @@ export default {
                 { required: true, message: '请输入名称', trigger: 'blur' }
             ]
         },
+        
     }
   },
 
@@ -160,11 +184,18 @@ export default {
           
       },
       // 发送请求获取参数列表数据
+      // 为了让每一行的添加标签键有单独功能 需要给每一行单独添加inputVisible和inputValue值
     async getParamsList() {
         const res = await this.axios.get(`categories/${this.cateId}/attributes`,{params:{sel:this.activeName}})
         //   console.log(res);
           if(res.meta.status == 200) {
-              if(this.activeName == 'many'){
+               // 将获取数据中的attr_val中的字符串转化为数组
+                  res.data.forEach(item=> {
+                      item.attr_vals=item.attr_vals?item.attr_vals.split(','):[]
+                      item.inputVisible = false
+                      item.inputValue = ''
+                  })
+              if(this.activeName == 'many'){                 
                 this.manyTableList = res.data
               } else {
                  this.onlyTableList = res.data 
@@ -277,6 +308,49 @@ export default {
         }).catch(() => {
           this.$message.info('已取消删除');          
         });
+      },
+
+      // 按下添加标签按钮时输入框显示
+      showInput(row) {
+         row.inputVisible = true 
+         // 自动获取焦点 $nextTick方法作用:就是当页面上元素被重新渲染之后 才会执行回调函数中的代码
+         this.$nextTick(_ => {
+          this.$refs.saveTagInput.$refs.input.focus();
+        });
+      },
+
+      // 标签变化时向后台发送请求
+      async editParamsAttr(row) {
+          const res = await this.axios.put(`categories/${this.cateId}/attributes/${row.attr_id}`,{
+              attr_name: row.attr_name,
+              attr_sel: row.attr_sel,
+              attr_vals: row.attr_vals.join(',')
+          })
+          console.log(res);
+          if(res.meta.status == 200) {
+              this.$message.success('更新成功')
+              row.inputValue = ''
+              row.inputVisible = false
+          }else {
+              this.$message.error(res.meta.msg)             
+          }
+      },
+      // 按下enter键或者失去标签时绑定的函数
+      handleInputConfirm(row) {
+          console.log(row.inputValue);
+          if(row.inputValue.trim().length == 0) {
+              row.inputValue = ''
+              row.inputVisible = false
+              return
+          }
+          row.attr_vals.push(row.inputValue)
+          // 输入框不为空时提交添加数据
+          this.editParamsAttr(row)
+      },
+      // 删除标签
+      handleClose(index,row) {         
+           row.attr_vals.splice(index,1)
+           this.editParamsAttr(row)
       }
   },
 
@@ -301,5 +375,11 @@ export default {
 <style lang='less' scoped>
 .el-table {
     margin-top: 15px
+}
+.el-tag {
+    margin-right: 10px;
+}
+.el-input {
+    width: 120px;
 }
 </style>

@@ -34,6 +34,19 @@ axios.interceptors.response.use((res) => {
 // 在vue原型上挂载axios方法 这样vue的每个组件都可以调用axios方法
 Vue.prototype.axios = axios
 
+// 定义日期格式转化的过滤器
+Vue.filter('format', function(time) {
+    const date = new Date(time)
+        // padStart()字符串的方法  填充作用
+    const y = (date.getFullYear() + '').padStart(2, 0)
+    const m = (date.getMonth() + 1 + '').padStart(2, 0)
+    const d = (date.getDate() + 1 + '').padStart(2, 0)
+    const h = (date.getHours() + 1 + '').padStart(2, 0)
+    const mm = (date.getMinutes() + 1 + '').padStart(2, 0)
+    const s = (date.getSeconds() + 1 + '').padStart(2, 0)
+    return `${y}-${m}-${d} ${h}:${mm}:${s}`
+})
+
 
 
 
